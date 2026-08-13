@@ -14,6 +14,8 @@ services:
       VLLM_PLUGINS: register_gigarembed
       GIGA_LOAD_IN_4BIT: "1"
       GIGA_HF_MAX_BATCH: "8"
+      VLLM_ENABLE_V1_MULTIPROCESSING: "0"
+      VLLM_WORKER_MULTIPROC_METHOD: fork
     command:
       - --model
       - /models/giga

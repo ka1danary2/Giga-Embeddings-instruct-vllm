@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-gigarembed"
+version = "0.1.0"
+description = "Out-of-tree vLLM plugin for ai-sage / iMiW Giga-Embeddings-instruct (GigarEmbedModel)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "RAGFlow / Giga embeddings" }]
+dependencies = [
+  "transformers>=4.46.0",
+  "accelerate>=0.33.0",
+  "bitsandbytes>=0.43.0",
+  "einops>=0.7.0",
+  "torch",
+  "sentencepiece",
+  "protobuf",
+]
+
+[project.optional-dependencies]
+vllm = ["vllm>=0.10.0"]
+
+[project.entry-points."vllm.general_plugins"]
+register_gigarembed = "vllm_gigarembed:register"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+vllm_gigarembed = ["py.typed"]

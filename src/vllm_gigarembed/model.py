@@ -44,6 +44,9 @@ class GigarEmbedForPooling(nn.Module):
 
     is_pooling_model = True
 
+    packed_modules_mapping = {"_plugin": ["_plugin"]}
+
+
     def __init__(
         self,
         vllm_config: Any = None,
@@ -68,9 +71,10 @@ class GigarEmbedForPooling(nn.Module):
             or 2048
         )
 
-        self.hf_model = load_gigar_embed(model_path, device=device)
-        # Dummy embedding table so ``embed_input_ids`` exists for protocol checks.
-        # Real token embeddings live inside ``hf_model``.
+        hf_model = load_gigar_embed(model_path, device=device)
+        # Do not register as an nn.Module child: vLLM weight loaders (dummy/bnb)
+        # would otherwise overwrite or reject these parameters.
+        object.__setattr__(self, "hf_model", hf_model)
         self._dummy_embed = nn.Embedding(1, self.hidden_size)
 
         max_batch = int(os.getenv("GIGA_HF_MAX_BATCH", "8"))

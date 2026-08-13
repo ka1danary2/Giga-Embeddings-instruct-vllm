@@ -52,7 +52,7 @@ class GigarHFPooler(nn.Module):
 
     def __init__(self, hf_model: nn.Module, device: torch.device, max_batch: int = 8):
         super().__init__()
-        self.hf_model = hf_model
+        object.__setattr__(self, "hf_model", hf_model)
         self.device = device
         self.max_batch = max(1, int(max_batch))
 

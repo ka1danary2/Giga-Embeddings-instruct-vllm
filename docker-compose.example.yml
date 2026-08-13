@@ -33,6 +33,10 @@ services:
       - --gpu-memory-utilization
       - "0.4"
       - --enforce-eager
+      - --load-format
+      - dummy
+      - --hf-overrides
+      - '{"quantization_config":null}'
     deploy:
       resources:
         reservations:

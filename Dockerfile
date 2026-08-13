@@ -5,8 +5,10 @@ FROM ${VLLM_IMAGE}
 USER root
 WORKDIR /opt/vllm_gigarembed
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml ./
 COPY src ./src
+# Packaging metadata; keep build working even if README was not synced yet.
+RUN if [ ! -f README.md ]; then printf '%s\n' '# vllm-gigarembed' > README.md; fi
 
 RUN pip install --no-cache-dir -e . \
     && pip install --no-cache-dir "bitsandbytes>=0.43.0" "einops>=0.7.0" "accelerate>=0.33.0"

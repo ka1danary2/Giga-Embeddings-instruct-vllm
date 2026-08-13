@@ -30,6 +30,9 @@ services:
       - Giga-Embeddings-instruct
       - --max-model-len
       - "4096"
+      - --gpu-memory-utilization
+      - "0.4"
+      - --enforce-eager
     deploy:
       resources:
         reservations:

@@ -35,8 +35,6 @@ services:
       - --enforce-eager
       - --load-format
       - dummy
-      - --hf-overrides
-      - '{"quantization_config":null}'
     deploy:
       resources:
         reservations:

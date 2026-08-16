@@ -1,5 +1,3 @@
-"""Load GigarEmbed HF weights (full or NF4 bitsandbytes)."""
-
 from __future__ import annotations
 
 import logging
@@ -18,13 +16,11 @@ def _want_4bit(model_path: str) -> bool:
         return True
     if env in {"0", "false", "no", "off"}:
         return False
-    # Heuristic: NF4 checkpoints usually have this in the path/name.
     lowered = model_path.lower()
     return "nf4" in lowered or "4bit" in lowered or "4-bit" in lowered
 
 
 def load_gigar_embed(model_path: str, device: str | torch.device) -> Any:
-    """Load ``GigarEmbedModel`` via transformers + trust_remote_code."""
     device = torch.device(device)
     kwargs: dict[str, Any] = {
         "trust_remote_code": True,

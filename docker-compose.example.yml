@@ -8,7 +8,6 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      # Local snapshot of iMiW/Giga-Embeddings-instruct-4bit-nf4 (or full ai-sage model)
       - ${GIGA_MODEL_HOST_PATH}:/models/giga:ro
     environment:
       VLLM_PLUGINS: register_gigarembed

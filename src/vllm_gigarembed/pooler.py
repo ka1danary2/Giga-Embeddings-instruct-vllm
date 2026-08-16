@@ -1,8 +1,5 @@
-"""Pooling head that runs the real GigarEmbed HF forward (latent-attention)."""
-
 from __future__ import annotations
 
-import logging
 from collections.abc import Set
 from typing import TYPE_CHECKING, Any
 
@@ -11,8 +8,6 @@ import torch.nn as nn
 
 if TYPE_CHECKING:
     from vllm.v1.pool.metadata import PoolingMetadata
-
-logger = logging.getLogger("vllm_gigarembed")
 
 
 def _get_prompt_token_ids(pooling_metadata: "PoolingMetadata") -> list[torch.Tensor]:
@@ -24,7 +19,7 @@ def _get_prompt_token_ids(pooling_metadata: "PoolingMetadata") -> list[torch.Ten
         from vllm.model_executor.layers.pooler import get_prompt_token_ids
 
         return get_prompt_token_ids(pooling_metadata)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise RuntimeError(
             "Cannot read prompt_token_ids from pooling_metadata; "
             "set requires_token_ids=True in get_pooling_updates."
@@ -32,24 +27,20 @@ def _get_prompt_token_ids(pooling_metadata: "PoolingMetadata") -> list[torch.Ten
 
 
 def _wrap_pooler_output(embeddings: list[torch.Tensor]) -> Any:
-    """Compatibility shim for vLLM 0.10 (PoolerOutput) vs newer (raw list)."""
     try:
         import inspect
 
         from vllm.model_executor.layers.pooler import DispatchPooler, build_output
 
         src = inspect.getsource(DispatchPooler.forward)
-        # v0.10 aggregates ``group_output.outputs``; newer extends a raw list.
         if "group_output.outputs" in src or "PoolingSequenceGroupOutput" in src:
             return build_output(embeddings)
-    except Exception:  # noqa: BLE001
+    except Exception:
         pass
     return embeddings
 
 
 class GigarHFPooler(nn.Module):
-    """Ignore vLLM hidden states; embed with HuggingFace GigarEmbedModel."""
-
     def __init__(self, hf_model: nn.Module, device: torch.device, max_batch: int = 8):
         super().__init__()
         object.__setattr__(self, "hf_model", hf_model)
@@ -59,7 +50,7 @@ class GigarHFPooler(nn.Module):
     def get_supported_tasks(self) -> Set[str]:
         return {"embed", "encode"}
 
-    def get_pooling_updates(self, task: str) -> Any:
+    def get_pooling_updates(self, _task: str) -> Any:
         from vllm.model_executor.layers.pooler import PoolingParamsUpdate
 
         return PoolingParamsUpdate(requires_token_ids=True)
@@ -94,7 +85,6 @@ class GigarHFPooler(nn.Module):
             out = out[0]
         if not torch.is_tensor(out):
             raise TypeError(f"Unexpected GigarEmbed output type: {type(out)}")
-        # Already L2-normalized inside modeling_gigarembed.mean_pool
         return [out[i].float() for i in range(out.shape[0])]
 
     def forward(
@@ -102,7 +92,7 @@ class GigarHFPooler(nn.Module):
         hidden_states: torch.Tensor,
         pooling_metadata: "PoolingMetadata",
     ) -> Any:
-        del hidden_states  # Gigar latent-attention pooling is done inside HF.
+        del hidden_states
         token_ids = _get_prompt_token_ids(pooling_metadata)
         embeddings: list[torch.Tensor] = []
         for start in range(0, len(token_ids), self.max_batch):

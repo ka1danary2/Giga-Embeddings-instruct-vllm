@@ -5,8 +5,6 @@
 Сборка и запуск:
 
 ```bash
-export GIGA_MODEL_HOST_PATH=/path/to/Giga-Embeddings-instruct-4bit-nf4
-
 docker build -t vllm-gigarembed:local .
 docker compose -f docker-compose.example.yml up -d
 ```
